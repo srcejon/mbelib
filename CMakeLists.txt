@@ -1,6 +1,9 @@
 project(mbe)
 cmake_minimum_required(VERSION 2.6)
 
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_STATIC_LIBS "Build static libraries" ON)
+
 if(MSVC)
     # needed for M_PI macro
     add_definitions(-D_USE_MATH_DEFINES)
@@ -10,16 +13,25 @@ FILE(GLOB SRCS *.c)
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
-ADD_LIBRARY(mbe-static STATIC ${SRCS})
-ADD_LIBRARY(mbe-shared SHARED ${SRCS})
-if(NOT WIN32)
-    TARGET_LINK_LIBRARIES(mbe-static m)
-    TARGET_LINK_LIBRARIES(mbe-shared m)
+set(TARGETS "")
+if(BUILD_STATIC_LIBS)
+    add_library(mbe-static STATIC ${SRCS})
+    if(NOT WIN32)
+        target_link_libraries(mbe-static m)
+    endif()
+    list(APPEND TARGETS "mbe-static")
+endif()
+if(BUILD_SHARED_LIBS)
+    add_library(mbe-shared SHARED ${SRCS})
+    if(NOT WIN32)
+        target_link_libraries(mbe-shared m)
+    endif()
+    list(APPEND TARGETS "mbe-shared")
 endif()
 
 include(GNUInstallDirs)
 
-set_target_properties(mbe-static mbe-shared
+set_target_properties(${TARGETS}
                       PROPERTIES
                       OUTPUT_NAME mbe
                       PREFIX lib
@@ -35,7 +47,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/libmbe.pc.in"
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libmbe.pc"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
-install(TARGETS mbe-static mbe-shared
+install(TARGETS ${TARGETS}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
