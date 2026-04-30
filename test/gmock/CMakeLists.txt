@@ -20,7 +20,6 @@ option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
 # ${gmock_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
 project(gmock CXX C)
-cmake_minimum_required(VERSION 2.6.2)
 
 # Adds Google Mock's and Google Test's header directories to the search path.
 include_directories("${gmock_SOURCE_DIR}/include"
